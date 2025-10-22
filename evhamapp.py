@@ -7,7 +7,13 @@ import re
 import math
 import pandas as pd
 import streamlit as st
-import folium
+import sys
+# --- Ensure folium is installed at runtime ---
+try:
+    import folium
+except ModuleNotFoundError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "folium==0.18.0"])
+    import folium
 from folium.plugins import MarkerCluster, HeatMap
 from streamlit_folium import st_folium
 from geopy.distance import geodesic
