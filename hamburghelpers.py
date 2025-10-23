@@ -784,7 +784,7 @@ def compute_daily_top10():
         WHERE charging_hours > 0
         ORDER BY charging_hours DESC
         LIMIT 10;
-    """)
+    """
     df = pd.read_sql_query(sql_str, engine)
     return df
 
@@ -834,7 +834,7 @@ def compute_yesterday_top10():
         WHERE charging_hours > 0
         ORDER BY charging_hours DESC
         LIMIT 10;
-    """)
+    """
     df = pd.read_sql_query(sql_str, engine)
     return df
 
