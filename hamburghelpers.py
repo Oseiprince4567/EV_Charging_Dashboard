@@ -741,7 +741,7 @@ from sqlalchemy import text
 # ----------------------------------------------------------------
 def compute_daily_top10():
     """Return today's top 10 busiest EV stations (aggregated by station_name)."""
-    query = text("""
+    sql_str = """
         WITH ordered AS (
             SELECT
                 o.station_id,
@@ -785,14 +785,13 @@ def compute_daily_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """)
-    with engine.connect() as conn:
-        df = pd.read_sql_query(query, conn)
+    df = pd.read_sql_query(sql_str, engine)
     return df
 
 
 def compute_yesterday_top10():
     """Return yesterday's top 10 busiest EV stations (aggregated by station_name)."""
-    query = text("""
+     sql_str = """
         WITH ordered AS (
             SELECT
                 o.station_id,
@@ -836,8 +835,7 @@ def compute_yesterday_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """)
-    with engine.connect() as conn:
-        df = pd.read_sql_query(query, conn)
+    df = pd.read_sql_query(sql_str, engine)
     return df
 
 
