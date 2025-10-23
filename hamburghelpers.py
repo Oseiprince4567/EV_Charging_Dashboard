@@ -791,7 +791,7 @@ def compute_daily_top10():
 
 def compute_yesterday_top10():
     """Return yesterday's top 10 busiest EV stations (aggregated by station_name)."""
-     sql_str = """
+    sql_str = """
         WITH ordered AS (
             SELECT
                 o.station_id,
