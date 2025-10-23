@@ -21,6 +21,14 @@ from tqdm import tqdm  # Added for progress bar
 from sqlalchemy import create_engine, text
 import logging
 
+# --- Database engine setup ---
+from sqlalchemy import create_engine
+import streamlit as st
+
+# Use the database URL stored in Streamlit Secrets
+engine = create_engine(st.secrets["database"]["url"], pool_pre_ping=True)
+
+
 # Configure logging once at the top
 logging.basicConfig(
     level=logging.INFO,
