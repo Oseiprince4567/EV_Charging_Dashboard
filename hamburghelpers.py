@@ -37,8 +37,8 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-PG_URI = "postgresql://evuser@localhost:5432/evcharging"
-engine = create_engine(PG_URI, pool_pre_ping=True)
+#PG_URI = "postgresql://evuser@localhost:5432/evcharging"
+#engine = create_engine(PG_URI, pool_pre_ping=True)
 BASE_URL = "https://iot.hamburg.de/v1.0/Datastreams?$expand=Thing($expand=Locations)"
 
 log = logging.getLogger(__name__)
