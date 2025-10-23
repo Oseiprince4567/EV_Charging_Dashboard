@@ -785,7 +785,8 @@ def compute_daily_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """
-    df = pd.read_sql_query(sql_str, engine)
+    with engine.connect() as conn:
+        df = pd.read_sql_query(sql_str, conn)
     return df
 
 
@@ -835,8 +836,10 @@ def compute_yesterday_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """
-    df = pd.read_sql_query(sql_str, engine)
+    with engine.connect() as conn:
+        df = pd.read_sql_query(sql_str, conn)
     return df
+
 
 
 def compute_daily_usage(top_station_names: List[str]) -> pd.DataFrame:
