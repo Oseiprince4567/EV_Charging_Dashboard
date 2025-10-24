@@ -735,6 +735,19 @@ def compute_weekly_station_usage():
 # ===============================
 from datetime import date, timedelta
 from sqlalchemy import text
+import pandas as pd
+
+# ============================================================
+# ✅ Safe query runner for SQLAlchemy 2.x + Pandas compatibility
+# ============================================================
+def run_query(sql_str, params=None):
+    """Safe wrapper for Pandas + SQLAlchemy 2.x compatibility."""
+    with engine.connect() as conn:
+        # open a real DBAPI connection
+        with conn.execution_options(stream_results=False) as connection:
+            result = connection.execute(text(sql_str), params or {})
+            df = pd.DataFrame(result.fetchall(), columns=result.keys())
+    return df
 
 # ----------------------------------------------------------------
 # ⚡ Realistic Top-10 busiest stations (aggregated by station_name)
@@ -785,9 +798,7 @@ def compute_daily_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """
-    with engine.connect() as conn:
-        df = pd.read_sql_query(sql_str, conn)
-    return df
+    return run_query(sql_str)
 
 def compute_yesterday_top10():
     """Return yesterday's top 10 busiest EV stations (aggregated by station_name)."""
@@ -835,9 +846,7 @@ def compute_yesterday_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """
-    with engine.connect() as conn:
-        df = pd.read_sql_query(sql_str, conn)
-    return df
+    return run_query(sql_str)
 
 def compute_daily_usage(top_station_names: List[str]) -> pd.DataFrame:
     """
