@@ -2,7 +2,7 @@ import time
 import requests
 from sqlalchemy import create_engine, text
 
-PG_URI = "postgresql+psycopg://evuser@localhost:5432/evcharging"
+PG_URI = "postgresql+psycopg://neondb_owner:npg_tVOMv5Jgb7sH@ep-restless-mode-agwf40zp-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require"
 engine = create_engine(PG_URI, pool_pre_ping=True)
 
 # ============================================================
