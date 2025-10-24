@@ -23,7 +23,7 @@ import logging
 
 # --- Database engine setup ---
 import streamlit as st
-import psycopg  # Force psycopg 3 dialect registration
+#import psycopg  # Force psycopg 3 dialect registration
 from sqlalchemy import create_engine
 
 # Use the database URL stored in Streamlit Secrets
