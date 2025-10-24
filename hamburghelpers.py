@@ -22,8 +22,9 @@ from sqlalchemy import create_engine, text
 import logging
 
 # --- Database engine setup ---
-from sqlalchemy import create_engine
 import streamlit as st
+import psycopg  # Force psycopg 3 dialect registration
+from sqlalchemy import create_engine
 
 # Use the database URL stored in Streamlit Secrets
 engine = create_engine(st.secrets["database"]["url"], pool_pre_ping=True)
