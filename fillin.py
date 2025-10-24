@@ -2,7 +2,7 @@ import time
 import requests
 from sqlalchemy import create_engine, text
 
-PG_URI = "postgresql://evuser@localhost:5432/evcharging"
+PG_URI = "postgresql+psycopg://evuser@localhost:5432/evcharging"
 engine = create_engine(PG_URI, pool_pre_ping=True)
 
 # ============================================================
