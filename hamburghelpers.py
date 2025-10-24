@@ -26,7 +26,7 @@ from sqlalchemy import create_engine
 import streamlit as st
 
 # Use the database URL stored in Streamlit Secrets
-engine = create_engine(st.secrets["database"]["url"].replace("+psycopg", "+psycopg2"), pool_pre_ping=True)
+engine = create_engine(st.secrets["database"]["url"], pool_pre_ping=True)
 
 
 # Configure logging once at the top
