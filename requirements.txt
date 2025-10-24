@@ -2,7 +2,7 @@ streamlit==1.38.0
 pandas==2.3.3
 requests==2.31.0
 sqlalchemy==1.4.51
-psycopg2-binary==2.9.11
+psycopg[binary]==3.2.11
 plotly==5.22.0
 altair==5.3.0
 folium==0.18.0
