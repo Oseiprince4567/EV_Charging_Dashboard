@@ -607,28 +607,46 @@ elif page == "📈 Analytics":
 
                 st.subheader("Heatmap of Today’s Top 10 Stations")
                 m = folium.Map(location=[53.55, 9.99], zoom_start=12, tiles="CartoDB positron")
-                max_hours = usage_today["charging_hours"].max() or 1
-                heat_points = [
-                    [r.latitude, r.longitude, r.charging_hours / max_hours]
-                    for r in usage_today.itertuples()
-                    if pd.notna(r.latitude) and pd.notna(r.longitude)
-                ]
-                if heat_points:
-                    HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
-                for r in usage_today.itertuples():
-                    if pd.isna(r.latitude) or pd.isna(r.longitude):
-                        continue
-                    popup = f"<b>{r.station_name}</b><br>📍 {r.address}<br>⏱ {r.charging_hours:.1f} h<br>🔌 {r.sessions} sessions"
-                    folium.CircleMarker(
-                        location=[r.latitude, r.longitude],
+                # --- Clean & validate coordinates ---
+                usage_today["latitude"] = pd.to_numeric(usage_today["latitude"], errors="coerce")
+                usage_today["longitude"] = pd.to_numeric(usage_today["longitude"], errors="coerce")
+                usage_today["charging_hours"] = pd.to_numeric(usage_today["charging_hours"], errors="coerce").fillna(0)
+                usage_today["sessions"] = pd.to_numeric(usage_today["sessions"], errors="coerce").fillna(0)
+
+                valid = usage_today.dropna(subset=["latitude", "longitude"])
+                if valid.empty:
+                    st.warning("No valid coordinates found for today's heatmap.")
+                else:
+                    max_hours = valid["charging_hours"].max() or 1
+                    heat_points = [
+                        [float(r.latitude), float(r.longitude), float(r.charging_hours / max_hours)]
+                        for r in valid.itertuples()
+                    ]
+                    # --- Add HeatMap safely ---
+                    if heat_points:
+                       try:
+                          HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
+                       except Exception as e:
+                          st.error(f"⚠️ HeatMap rendering error: {e}")
+
+                    # --- Add station markers ---
+                    for r in valid.itertuples():   
+                      popup = (
+                          f"<b>{r.station_name}</b><br>"
+                          f"📍 {r.address}<br>"
+                          f"⏱ {r.charging_hours:.1f} h<br>"
+                          f"🔌 {int(r.sessions)} sessions"
+                      )
+                      folium.CircleMarker(
+                        location=[float(r.latitude), float(r.longitude)],
                         radius=6,
                         color="red",
                         fill=True,
                         fill_color="orange",
                         fill_opacity=0.85,
                         popup=popup,
-                    ).add_to(m)
-                st_folium(m, width=1000, height=520)
+                     ).add_to(m)
+                  st_folium(m, width=1000, height=520)
 
             # 🕸️ Radar chart (Plotly — Today)
             with t2:
