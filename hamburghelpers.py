@@ -785,10 +785,9 @@ def compute_daily_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """
-    # ✅ Use engine directly again
-    df = pd.read_sql_query(sql_str, engine)
+    with engine.connect() as conn:
+        df = pd.read_sql_query(sql_str, conn)
     return df
-
 
 def compute_yesterday_top10():
     """Return yesterday's top 10 busiest EV stations (aggregated by station_name)."""
@@ -836,10 +835,9 @@ def compute_yesterday_top10():
         ORDER BY charging_hours DESC
         LIMIT 10;
     """
-    # ✅ Use engine directly (pandas handles connections)
-    df = pd.read_sql_query(sql_str, engine)
+    with engine.connect() as conn:
+        df = pd.read_sql_query(sql_str, conn)
     return df
-
 
 def compute_daily_usage(top_station_names: List[str]) -> pd.DataFrame:
     """
