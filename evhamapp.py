@@ -604,6 +604,7 @@ elif page == "📈 Analytics":
                 from streamlit_folium import st_folium
                 from folium.plugins import HeatMap
                 import folium
+                import numpy as np
 
                 st.subheader("Heatmap of Today’s Top 10 Stations")
                 m = folium.Map(location=[53.55, 9.99], zoom_start=12, tiles="CartoDB positron")
@@ -626,6 +627,7 @@ elif page == "📈 Analytics":
                             heat_points.append([lat, lon, weight])
                     except Exception:
                         continue  # Skip bad rows safely
+                
                 # --- Add HeatMap layer safely ---
                 if heat_points:
                    try:
@@ -635,25 +637,28 @@ elif page == "📈 Analytics":
                 else:
                   st.warning("No valid coordinates found for today's heatmap.")
                     
-                    # --- Add station markers ---
-                    for r in valid.itertuples():   
-                      popup = (
-                          f"<b>{r.station_name}</b><br>"
-                          f"📍 {r.address}<br>"
-                          f"⏱ {r.charging_hours:.1f} h<br>"
-                          f"🔌 {int(r.sessions)} sessions"
-                      )
-                      folium.CircleMarker(
-                        location=[float(r.latitude), float(r.longitude)],
-                        radius=6,
-                        color="red",
-                        fill=True,
-                        fill_color="orange",
-                        fill_opacity=0.85,
-                        popup=popup,
-                     ).add_to(m)
-                        
-            st_folium(m, width=1000, height=520)
+                # --- Add station markers ---
+                for r in valid.itertuples():
+                    try:
+                        popup = (
+                            f"<b>{r.station_name}</b><br>"
+                            f"📍 {r.address}<br>"
+                            f"⏱ {r.charging_hours:.1f} h<br>"
+                            f"🔌 {int(r.sessions)} sessions"
+                        )
+                        folium.CircleMarker(
+                            location=[float(r.latitude), float(r.longitude)],
+                            radius=6,
+                            color="red",
+                            fill=True,
+                            fill_color="orange",
+                            fill_opacity=0.85,
+                            popup=popup,
+                        ).add_to(m)
+                    except Exception:
+                        continue
+
+               st_folium(m, width=1000, height=520)
 
             # 🕸️ Radar chart (Plotly — Today)
             with t2:
