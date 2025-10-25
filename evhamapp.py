@@ -648,6 +648,8 @@ elif page == "📈 Analytics":
                        #Force every coordinate to be numeric float32 before Folium check
                        heat_points = np.array(heat_points, dtype="float32").tolist()
                        HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
+                   except TypeError as e:
+                       st.warning("⚠️ Some invalid coordinate values were skipped in the heatmap.")
                    except Exception as e:
                        st.error(f"⚠️ Heatmap rendering error: {e}")
                 else:
