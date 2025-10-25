@@ -614,8 +614,16 @@ elif page == "📈 Analytics":
                 usage_today["charging_hours"] = pd.to_numeric(usage_today["charging_hours"], errors="coerce").fillna(0)
                 usage_today["sessions"] = pd.to_numeric(usage_today["sessions"], errors="coerce").fillna(0)
 
-                valid = usage_today.dropna(subset=["latitude", "longitude"])
-                max_hours = valid["charging_hours"].max() or 1
+                valid = usage_today.dropna(subset=["latitude", "longitude", "charging_hours"])
+                valid = valid[
+                    (valid["latitude"].between(-90, 90))
+                    & (valid["longitude"].between(-180, 180))
+                    & (valid["charging_hours"] > 0)
+                ]
+                
+                max_hours = valid["charging_hours"].max()
+                if pd.isna(max_hours) or max_hours <= 0:
+                    max_hours = 1.0  # prevent divide-by-zero
                     
                 heat_points = []        
                 for r in valid.itertuples():
@@ -623,7 +631,13 @@ elif page == "📈 Analytics":
                         lat = float(r.latitude)
                         lon = float(r.longitude)
                         weight = float(r.charging_hours / max_hours)
-                        if np.isfinite(lat) and np.isfinite(lon):
+                        if (
+                            np.isfinite(lat)
+                            and np.isfinite(lon)
+                            and np.isfinite(weight)
+                            and -90 <= lat <= 90
+                            and -180 <= lon <= 180
+                        ):
                             heat_points.append([lat, lon, weight])
                     except Exception:
                         continue  # Skip bad rows safely
@@ -637,7 +651,7 @@ elif page == "📈 Analytics":
                    except Exception as e:
                        st.error(f"⚠️ Heatmap rendering error: {e}")
                 else:
-                  st.warning("No valid coordinates found for today's heatmap.")
+                    st.warning("No valid coordinates found for today's heatmap.")
                     
                 # --- Add station markers ---
                 for r in valid.itertuples():
