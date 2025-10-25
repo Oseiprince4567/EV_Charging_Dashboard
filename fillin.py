@@ -1,7 +1,8 @@
+import os
 import time
-import requests
 from sqlalchemy import create_engine, text
 
+# --- Handle missing requests gracefully ---
 try:
     import requests
 except ModuleNotFoundError:
@@ -9,8 +10,11 @@ except ModuleNotFoundError:
     st.error("⚠️ 'requests' module missing — please rebuild dependencies.")
     raise
 
+# --- Database connection (uses GitHub Secret or local env var) ---
+PG_URI = os.getenv("DATABASE_URL")
+if not PG_URI:
+    raise ValueError("❌ DATABASE_URL environment variable not set. Did you add it as a GitHub Secret?")
 
-PG_URI = "postgresql+psycopg2://neondb_owner:npg_tVOMv5Jgb7sH@ep-restless-mode-agwf40zp-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require"
 engine = create_engine(PG_URI, pool_pre_ping=True)
 
 # ============================================================
