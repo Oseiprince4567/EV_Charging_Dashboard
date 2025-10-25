@@ -552,7 +552,7 @@ elif page == "📈 Analytics":
     st.info(
     """
     Data for this dashboard are retrieved from **Hamburg SensorThings API**
-    and automatically refreshed every **six hours** via a scheduled **GitHub Actions.  
+    and automatically refreshed every **six hours** via a scheduled GitHub Actions.  
     This automation connects to a **Neon PostgreSQL** database to ensure that all visualizations
     and analytics display the latest IoT activity.
     """
