@@ -551,10 +551,10 @@ elif page == "📈 Analytics":
     st.markdown("### 🔄 Live Data Update Status")
     st.info(
     """
-    This dashboard is powered by the **Hamburg SensorThings API**, which is
-    automatically updated every **six hours** via **GitHub Actions.  
-    This automation connects to a **Neon PostgreSQL** database to ensure that all maps
-    and analytics reflect the **latest IoT observations.
+    Data for this dashboard are retrieved from **Hamburg SensorThings API**
+    and automatically refreshed every **six hours** via a scheduled **GitHub Actions.  
+    This automation connects to a **Neon PostgreSQL** database to ensure that all visualizations
+    and analytics display the latest IoT activity.
     """
     )
 
