@@ -548,24 +548,15 @@ elif page == "📈 Analytics":
     # ===========================================================
     # 🔄 Refresh IoT Data Button
     # ===========================================================
-    st.markdown("### 🔄 Live Data Control")
-    if st.button("🔁 Refresh Live IoT Data Now"):
-        with st.spinner("Fetching latest Hamburg IoT data..."):
-            try:
-                result = subprocess.run(
-                    ["python", "fillin.py"],
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-                st.success("✅ Data refreshed successfully!")
-                # 🕒 Show last refresh time
-                st.caption(f"Last refreshed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                st.text_area("Sync log:", result.stdout, height=200)
-            except subprocess.CalledProcessError as e:
-                st.error("❌ Error while syncing data.")
-                st.text_area("Error details:", e.stderr or str(e), height=200)
-        st.stop()  # Prevent rest of page from running until reload
+    st.markdown("### 🔄 Live Data Update Status")
+    st.info(
+    """
+    This dashboard is powered by the **Hamburg SensorThings API**, which is
+    automatically updated every **six hours** via a **GitHub Actions** workflow.  
+    The pipeline connects to a **Neon PostgreSQL** database to ensure that all maps
+    and analytics reflect the **latest IoT observations** — no manual refresh needed.
+    """
+    )
 
     tab_today, tab_yesterday = st.tabs(["⚡ Today (Live Analytics)", "📅 Yesterday (Summary)"])
 
