@@ -587,6 +587,13 @@ elif page == "📈 Analytics":
                 use_container_width=True,
             )
 
+            st.markdown("""
+            **ℹ️ Note:**  
+            - **Sessions** → Number of times a charging connector entered the `CHARGING` state within the selected day.  
+            - **Charging hours** → Cumulative duration (in hours) spent actively charging, calculated from consecutive IoT time intervals.  
+            """)
+
+            
             # Tabs inside today's analytics
             t1, t2, t3 = st.tabs(["🌍 Heatmap", "🕸️ Radar Chart", "🏆 Top Station"])
 
