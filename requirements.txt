@@ -1,6 +1,6 @@
 streamlit==1.38.0
 pandas==2.2.2
-requests==2.31.0
+requests==2.31.0  # ensure available for fillin.py subprocess
 sqlalchemy==1.4.51
 psycopg2-binary==2.9.9
 plotly==5.22.0
