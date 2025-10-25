@@ -1,0 +1,39 @@
+# .github/workflows/fillin.yml
+name: Run fillin script (Hamburg IoT Sync)
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # every 6 hours (UTC)
+  workflow_dispatch:         # allow manual runs from the Actions tab
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fillin-${{ github.ref }}
+  cancel-in-progress: false   # don't overlap runs on the same branch
+
+jobs:
+  run-fillin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run fillin.py
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python fillin.py
