@@ -623,14 +623,16 @@ elif page == "📈 Analytics":
                         lat = float(r.latitude)
                         lon = float(r.longitude)
                         weight = float(r.charging_hours / max_hours)
-                        if not (np.isnan(lat) or np.isnan(lon)):
+                        if np.isfinite(lat) and np.isfinite(lon):
                             heat_points.append([lat, lon, weight])
                     except Exception:
                         continue  # Skip bad rows safely
                 
                 # --- Add HeatMap layer safely ---
-                if heat_points:
+                if len(heat_points) > 0:
                    try:
+                       #Force every coordinate to be numeric float32 before Folium check
+                       heat_points = np.array(heat_points, dtype="float32").tolist()
                        HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
                    except Exception as e:
                        st.error(f"⚠️ Heatmap rendering error: {e}")
