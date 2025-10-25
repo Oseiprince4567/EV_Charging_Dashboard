@@ -552,9 +552,9 @@ elif page == "📈 Analytics":
     st.info(
     """
     This dashboard is powered by the **Hamburg SensorThings API**, which is
-    automatically updated every **six hours** via a **GitHub Actions** workflow.  
-    The pipeline connects to a **Neon PostgreSQL** database to ensure that all maps
-    and analytics reflect the **latest IoT observations** — no manual refresh needed.
+    automatically updated every **six hours** via **GitHub Actions.  
+    This automation connects to a **Neon PostgreSQL** database to ensure that all maps
+    and analytics reflect the **latest IoT observations.
     """
     )
 
