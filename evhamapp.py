@@ -614,21 +614,27 @@ elif page == "📈 Analytics":
                 usage_today["sessions"] = pd.to_numeric(usage_today["sessions"], errors="coerce").fillna(0)
 
                 valid = usage_today.dropna(subset=["latitude", "longitude"])
-                if valid.empty:
-                    st.warning("No valid coordinates found for today's heatmap.")
+                max_hours = valid["charging_hours"].max() or 1
+                    
+                heat_points = []        
+                for r in valid.itertuples():
+                    try:
+                        lat = float(r.latitude)
+                        lon = float(r.longitude)
+                        weight = float(r.charging_hours / max_hours)
+                        if not (np.isnan(lat) or np.isnan(lon)):
+                            heat_points.append([lat, lon, weight])
+                    except Exception:
+                        continue  # Skip bad rows safely
+                # --- Add HeatMap layer safely ---
+                if heat_points:
+                   try:
+                       HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
+                   except Exception as e:
+                       st.error(f"⚠️ Heatmap rendering error: {e}")
                 else:
-                    max_hours = valid["charging_hours"].max() or 1
-                    heat_points = [
-                        [float(r.latitude), float(r.longitude), float(r.charging_hours / max_hours)]
-                        for r in valid.itertuples()
-                    ]
-                    # --- Add HeatMap safely ---
-                    if heat_points:
-                       try:
-                          HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
-                       except Exception as e:
-                          st.error(f"⚠️ HeatMap rendering error: {e}")
-
+                  st.warning("No valid coordinates found for today's heatmap.")
+                    
                     # --- Add station markers ---
                     for r in valid.itertuples():   
                       popup = (
