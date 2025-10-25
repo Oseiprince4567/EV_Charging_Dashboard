@@ -658,7 +658,7 @@ elif page == "📈 Analytics":
                     except Exception:
                         continue
 
-               st_folium(m, width=1000, height=520)
+            st_folium(m, width=1000, height=520)
 
             # 🕸️ Radar chart (Plotly — Today)
             with t2:
