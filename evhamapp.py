@@ -607,51 +607,52 @@ elif page == "📈 Analytics":
                 st.subheader("Heatmap of Today’s Top 10 Stations")
                 m = folium.Map(location=[53.55, 9.99], zoom_start=12, tiles="CartoDB positron")
                 # --- Clean & validate coordinates ---
-                usage_today["latitude"] = pd.to_numeric(usage_today["latitude"], errors="coerce")
-                usage_today["longitude"] = pd.to_numeric(usage_today["longitude"], errors="coerce")
-                usage_today["charging_hours"] = pd.to_numeric(usage_today["charging_hours"], errors="coerce").fillna(0)
-                usage_today["sessions"] = pd.to_numeric(usage_today["sessions"], errors="coerce").fillna(0)
+                def clean_numeric(x):
+                    """Remove units, labels, or stray characters before conversion."""
+                    if isinstance(x, str):
+                        x = (
+                            x.replace("h", "")
+                             .replace("sessions", "")
+                             .replace(",", ".")
+                             .strip()
 
-                valid = usage_today.dropna(subset=["latitude", "longitude", "charging_hours"])
-                valid = valid[
-                    (valid["latitude"].between(-90, 90))
-                    & (valid["longitude"].between(-180, 180))
-                    & (valid["charging_hours"] > 0)
-                ]
-                
-                max_hours = valid["charging_hours"].max()
-                if pd.isna(max_hours) or max_hours <= 0:
-                    max_hours = 1.0  # prevent divide-by-zero
+                        )
+                    return pd.to_numeric(x, errors="coerce")
                     
-                heat_points = []        
-                for r in valid.itertuples():
-                    try:
-                        lat = float(r.latitude)
-                        lon = float(r.longitude)
-                        weight = float(r.charging_hours / max_hours)
-                        if (
-                            np.isfinite(lat)
-                            and np.isfinite(lon)
-                            and np.isfinite(weight)
-                            and -90 <= lat <= 90
-                            and -180 <= lon <= 180
-                        ):
-                            heat_points.append([lat, lon, weight])
-                    except Exception:
-                        continue  # Skip bad rows safely
+                usage_today["latitude"] = usage_today["latitude"].apply(clean_numeric)
+                usage_today["longitude"] = usage_today["longitude"].apply(clean_numeric)
+                usage_today["charging_hours"] = usage_today["charging_hours"].apply(clean_numeric).fillna(0)
+                usage_today["sessions"] = usage_today["sessions"].apply(clean_numeric).fillna(0)
+
+                valid = usage_today[
+                    usage_today["latitude"].between(-90, 90)
+                    & usage_today["longitude"].between(-180, 180)
+                    & (usage_today["charging_hours"] > 0)
+                ].copy()
+
+                max_hours = valid["charging_hours"].max() or 1.0
+                
+                # --- Build sanitized heat_points ---    
+                heat_points = (
+                    valid[["latitude", "longitude", "charging_hours"]]
+                    .assign(weight=lambda x: x["charging_hours"] / max_hours)
+                    [["latitude", "longitude", "weight"]]
+                    .dropna()
+                    .astype("float64")
+                    .to_numpy()
+                )
+
+                heat_points = heat_points[np.isfinite(heat_points).all(axis=1)]
                 
                 # --- Add HeatMap layer safely ---
-                if len(heat_points) > 0:
+                if len(heat_points) >= 3:
                    try:
                        #Force every coordinate to be numeric float32 before Folium check
-                       heat_points = np.array(heat_points, dtype="float32").tolist()
                        HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
-                   except TypeError as e:
-                       st.warning("⚠️ Some invalid coordinate values were skipped in the heatmap.")
                    except Exception as e:
                        st.error(f"⚠️ Heatmap rendering error: {e}")
                 else:
-                    st.warning("No valid coordinates found for today's heatmap.")
+                    st.warning("No valid coordinates available to generate heatmap.")
                     
                 # --- Add station markers ---
                 for r in valid.itertuples():
