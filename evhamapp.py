@@ -603,6 +603,7 @@ elif page == "📈 Analytics":
                 from folium.plugins import HeatMap
                 import folium
                 import numpy as np
+                import warnings
 
                 st.subheader("Heatmap of Today’s Top 10 Stations")
                 m = folium.Map(location=[53.55, 9.99], zoom_start=12, tiles="CartoDB positron")
@@ -649,14 +650,16 @@ elif page == "📈 Analytics":
                    try:
                        #Force every coordinate to be numeric float32 before Folium check
                        heat_points = [(float(a), float(b), float(c)) for a, b, c in heat_points]
-                       HeatMap(
-                           data=heat_points,
-                           radius=25,
-                           blur=15,
-                           max_zoom=14,
-                           min_opacity=0.4,
-                           gradient={0.3: "blue", 0.6: "lime", 0.9: "red"}
-                       ).add_to(m)
+                       with warnings.catch_warnings():
+                           warnings.simplefilter("ignore", category=RuntimeWarning)
+                           HeatMap(
+                               data=heat_points,
+                               radius=25,
+                               blur=15,
+                               max_zoom=14,
+                               min_opacity=0.4,
+                               gradient={0.3: "blue", 0.6: "lime", 0.9: "red"}
+                           ).add_to(m)
                    except Exception as e:
                        st.error(f"⚠️ Heatmap rendering error: {e}")
                 else:
