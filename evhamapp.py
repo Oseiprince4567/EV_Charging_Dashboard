@@ -633,22 +633,30 @@ elif page == "📈 Analytics":
                 max_hours = valid["charging_hours"].max() or 1.0
                 
                 # --- Build sanitized heat_points ---    
-                heat_points = (
-                    valid[["latitude", "longitude", "charging_hours"]]
-                    .assign(weight=lambda x: x["charging_hours"] / max_hours)
-                    [["latitude", "longitude", "weight"]]
-                    .dropna()
-                    .astype("float64")
-                    .to_numpy()
-                )
-
-                heat_points = heat_points[np.isfinite(heat_points).all(axis=1)]
+                heat_points = []
+                for r in valid.itertuples():
+                    try:
+                        lat = float(r.latitude)
+                        lon = float(r.longitude)
+                        weight = float(r.charging_hours) / max_hours
+                        if all(np.isfinite([lat, lon, weight])) and (-90 <= lat <= 90) and (-180 <= lon <= 180):
+                            heat_points.append((lat, lon, weight))
+                        except Exception:
+                            continue
                 
                 # --- Add HeatMap layer safely ---
                 if len(heat_points) >= 3:
                    try:
                        #Force every coordinate to be numeric float32 before Folium check
-                       HeatMap(heat_points, radius=25, blur=15, max_zoom=14).add_to(m)
+                       heat_points = [(float(a), float(b), float(c)) for a, b, c in heat_points]
+                       HeatMap(
+                           data=heat_points,
+                           radius=25,
+                           blur=15,
+                           max_zoom=14,
+                           min_opacity=0.4,
+                           gradient={0.3: "blue", 0.6: "lime", 0.9: "red"}
+                       ).add_to(m)
                    except Exception as e:
                        st.error(f"⚠️ Heatmap rendering error: {e}")
                 else:
