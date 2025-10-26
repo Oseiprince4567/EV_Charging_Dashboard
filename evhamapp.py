@@ -156,7 +156,7 @@ page = st.sidebar.radio("Select View", ["⚡ Live Dashboard", "📈 Analytics"],
 # ⚡ LIVE DASHBOARD
 # ===================================================================
 if page == "⚡ Live Dashboard":
-    st.title("⚡ Hamburg EV Charging — Live Status")
+    st.title("⚡ Hamburg EV Charging Stations — Live Status")
 
     # ---- Source + refresh
     st.sidebar.header("Data source")
