@@ -641,7 +641,7 @@ elif page == "📈 Analytics":
                         weight = float(r.charging_hours) / max_hours
                         if all(np.isfinite([lat, lon, weight])) and (-90 <= lat <= 90) and (-180 <= lon <= 180):
                             heat_points.append((lat, lon, weight))
-                        except Exception:
+                    except Exception:
                             continue
                 
                 # --- Add HeatMap layer safely ---
