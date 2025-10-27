@@ -1,5 +1,5 @@
-# helpers.py — Hamburg EV charging (SensorThings API), Streamlit-cached helpers
-# Keeps your original vibe: same imports, comments, geodesic/Nominatim, Folium.
+# hamburghelpers.py — Hamburg EV charging (SensorThings API), Streamlit-cached helpers
+# backend
 
 import urllib  # Import module for working with URLs
 import urllib.request
@@ -46,7 +46,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 # -------------------------------------------------------------------
-# Update Datastream–Station Mapping Table
+# Update Datastream:Station Mapping Table
 # -------------------------------------------------------------------
 def update_datastream_station_table():
     """
@@ -241,7 +241,7 @@ def _estimate_kw(current, connector_type):
     return KW_ESTIMATE.get(key)
 
 # ------------------------------------------------------------------------------
-# Data access + wrangling (Hamburg SensorThings)
+# Data access + wrangling from (Hamburg SensorThingsAPI)
 # ------------------------------------------------------------------------------
 
 @st.cache_data(show_spinner=True)
@@ -732,7 +732,7 @@ def compute_weekly_station_usage():
 # ... (keep existing imports and code)
 
 # ===============================
-# Analytics Helpers (Daily + Yesterday)
+# Analytics Helpers (Daily + Yesterday Statistics)
 # ===============================
 from datetime import date, timedelta
 from sqlalchemy import text
