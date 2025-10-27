@@ -1,8 +1,9 @@
+#Data from IOT ingestion script, created by POB
 import os
 import time
 from sqlalchemy import create_engine, text
 
-# --- Handle missing requests gracefully ---
+# --- Handle missing requests ---
 try:
     import requests
 except ModuleNotFoundError:
@@ -10,7 +11,7 @@ except ModuleNotFoundError:
     st.error("⚠️ 'requests' module missing — please rebuild dependencies.")
     raise
 
-# --- Database connection (uses GitHub Secret or local env var) ---
+# --- Database connection (uses GitHub Secret) ---
 PG_URI = os.getenv("DATABASE_URL")
 if not PG_URI:
     raise ValueError("❌ DATABASE_URL environment variable not set. Did you add it as a GitHub Secret?")
