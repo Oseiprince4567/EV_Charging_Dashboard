@@ -1,7 +1,6 @@
-# evhamapp.py — Hamburg EV Charging (LIVE + Analytics via PostgreSQL)
-# Full app with two pages:
+# evhamapp.py — Hamburg EV Charging (LIVE + Analytics via PostgreSQL) created by POB
 # 1) ⚡ Live Dashboard (SensorThings)
-# 2) 📈 Analytics (PostgreSQL weekly/daily usage)
+# 2) 📈 Analytics (PostgreSQL daily and previous day usage statistics)
 
 import re
 import math
@@ -23,12 +22,12 @@ import subprocess
 from datetime import datetime
 
 # -------------------------------------------------------------------
-# Page config MUST be the first Streamlit call
+# Page config 
 # -------------------------------------------------------------------
 st.set_page_config(page_title="Hamburg EV Charging", page_icon="⚡", layout="wide")
 
 # -------------------------------------------------------------------
-# Helpers from our library
+# library helpers
 # -------------------------------------------------------------------
 try:
     from hamburghelpers import (
@@ -148,7 +147,7 @@ def add_map_legend(m):
     return m
 
 # -------------------------------------------------------------------
-# Sidebar: page switcher
+# Sidebar: switch between live dashboard & Analytics
 # -------------------------------------------------------------------
 page = st.sidebar.radio("Select View", ["⚡ Live Dashboard", "📈 Analytics"], index=0)
 
@@ -405,7 +404,7 @@ if page == "⚡ Live Dashboard":
 
     m = add_map_legend(m)
 
-    # ---- Nearest (connector first, then station) + draw line
+    # ---- Nearest (connector first, then station) + distance line from point of query
     st.subheader("Nearest station / connector")
     visible_connectors = connectors_df.reset_index()
     if view.startswith("Connectors") and 'status_filter' in locals() and status_filter:
@@ -536,7 +535,7 @@ if page == "⚡ Live Dashboard":
 
 
 # ===================================================================
-# 📈 ANALYTICS (PostgreSQL — Combined: Today & Yesterday)
+# 📈 ANALYTICS (Neon PostgreSQL — Combined: Today & Yesterday)
 # ===================================================================
 elif page == "📈 Analytics":
     from hamburghelpers import compute_daily_top10, compute_yesterday_top10
@@ -546,7 +545,7 @@ elif page == "📈 Analytics":
     st.title("📈 EV Charging Activity Dashboard")
 
     # ===========================================================
-    # 🔄 Refresh IoT Data Button
+    # 🔄 Refresh IoT Data Button(commented out )
     # ===========================================================
     st.markdown("### 🔄 Live Data Update Status")
     st.info(
