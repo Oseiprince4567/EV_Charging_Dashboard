@@ -23,7 +23,7 @@ engine = create_engine(PG_URI, pool_pre_ping=True)
 # ============================================================
 BASE_URL = (
     "https://iot.hamburg.de/v1.0/Things"
-    "?$expand=Locations,Datastreams($expand=Observations($top=5;$orderby=phenomenonTime+desc))"
+    "?$expand=Locations,Datastreams($expand=Observations($top=1))"
 )
 
 def fetch_page(url, attempt=1, max_attempts=5):
