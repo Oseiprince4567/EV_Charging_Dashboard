@@ -121,7 +121,7 @@ def update_datastream_station_table():
 HAMBURG_URL = (
     "https://iot.hamburg.de/v1.0/Things?"
     "$filter=substringof('Lade',name)"
-    "&$expand=Locations,Datastreams/Observations($orderby=phenomenonTime%20desc;$top=1)"
+    "&$expand=Locations,Datastreams($expand=Observations($top=1))"
     "&$count=true"
 )
 
@@ -250,8 +250,9 @@ def fetch_hamburg_things(url: str = HAMBURG_URL) -> list:
     things = []
     next_url = url
     while next_url:
-        with urllib.request.urlopen(next_url) as resp:
-            payload = json.loads(resp.read().decode())
+        r = requests.get(next_url, timeout=30)
+        r.raise_for_status()
+        payload = r.json()
         things.extend(payload.get("value", []))
         next_url = payload.get("@iot.nextLink")
     return things
