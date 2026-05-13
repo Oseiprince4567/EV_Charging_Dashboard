@@ -755,9 +755,14 @@ def run_query(sql_str, params=None):
 # ⚡ Realistic Top-10 busiest stations (aggregated by station_name)
 # ----------------------------------------------------------------
 def compute_daily_top10():
-    """Return today's top 10 busiest EV stations (aggregated by station_name)."""
+    """Return top 10 busiest EV stations for the most recent day with CHARGING data."""
     sql_str = """
-        WITH ordered AS (
+        WITH latest_day AS (
+            SELECT MAX(phenomenon_time::date) AS day
+            FROM observations
+            WHERE result = 'CHARGING'
+        ),
+        ordered AS (
             SELECT
                 o.station_id,
                 ds.station_name,
@@ -771,7 +776,7 @@ def compute_daily_top10():
                     AS next_time
             FROM observations o
             JOIN datastream_station ds ON o.station_id = ds.station_id
-            WHERE o.phenomenon_time::date = CURRENT_DATE
+            WHERE o.phenomenon_time::date = (SELECT day FROM latest_day)
         ),
         charging_intervals AS (
             SELECT
@@ -794,7 +799,7 @@ def compute_daily_top10():
             FROM charging_intervals
             GROUP BY station_name, address, latitude, longitude
         )
-        SELECT *
+        SELECT *, (SELECT day FROM latest_day) AS data_date
         FROM aggregated
         WHERE charging_hours > 0
         ORDER BY charging_hours DESC
@@ -802,10 +807,21 @@ def compute_daily_top10():
     """
     return run_query(sql_str)
 
+
 def compute_yesterday_top10():
-    """Return yesterday's top 10 busiest EV stations (aggregated by station_name)."""
+    """Return top 10 busiest EV stations for the second most recent day with CHARGING data."""
     sql_str = """
-        WITH ordered AS (
+        WITH ranked_days AS (
+            SELECT DISTINCT phenomenon_time::date AS day
+            FROM observations
+            WHERE result = 'CHARGING'
+            ORDER BY day DESC
+            LIMIT 2
+        ),
+        target_day AS (
+            SELECT MIN(day) AS day FROM ranked_days
+        ),
+        ordered AS (
             SELECT
                 o.station_id,
                 ds.station_name,
@@ -819,7 +835,7 @@ def compute_yesterday_top10():
                     AS next_time
             FROM observations o
             JOIN datastream_station ds ON o.station_id = ds.station_id
-            WHERE o.phenomenon_time::date = CURRENT_DATE - INTERVAL '1 day'
+            WHERE o.phenomenon_time::date = (SELECT day FROM target_day)
         ),
         charging_intervals AS (
             SELECT
@@ -842,7 +858,7 @@ def compute_yesterday_top10():
             FROM charging_intervals
             GROUP BY station_name, address, latitude, longitude
         )
-        SELECT *
+        SELECT *, (SELECT day FROM target_day) AS data_date
         FROM aggregated
         WHERE charging_hours > 0
         ORDER BY charging_hours DESC
