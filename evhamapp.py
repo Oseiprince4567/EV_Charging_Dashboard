@@ -557,7 +557,7 @@ elif page == "📈 Analytics":
     """
     )
 
-    tab_today, tab_yesterday = st.tabs(["⚡ Today (Live Analytics)", "📅 Yesterday (Summary)"])
+    tab_today, tab_yesterday = st.tabs(["⚡ Most Recent Day", "📅 Previous Day"])
 
     # -----------------------------------------------------------
     # 🟢 TODAY TAB
@@ -570,6 +570,8 @@ elif page == "📈 Analytics":
         if usage_today.empty:
             st.warning("No live data found for today.")
         else:
+            if "data_date" in usage_today.columns:
+                st.caption(f"Showing data for: **{usage_today['data_date'].iloc[0]}**")
             total_hours = usage_today["charging_hours"].sum()
             total_sessions = usage_today["sessions"].sum()
 
@@ -753,6 +755,8 @@ elif page == "📈 Analytics":
         if usage_yday.empty:
             st.warning("No data found for yesterday.")
         else:
+            if "data_date" in usage_yday.columns:
+                st.caption(f"Showing data for: **{usage_yday['data_date'].iloc[0]}**")
             total_hours_y = usage_yday["charging_hours"].sum()
             total_sessions_y = usage_yday["sessions"].sum()
 
