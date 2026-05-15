@@ -761,48 +761,21 @@ def compute_daily_top10():
             SELECT MAX(phenomenon_time::date) AS day
             FROM observations
             WHERE result = 'CHARGING'
-        ),
-        ordered AS (
-            SELECT
-                o.station_id,
-                ds.station_name,
-                ds.address,
-                ds.latitude,
-                ds.longitude,
-                o.phenomenon_time,
-                o.result,
-                LEAD(o.phenomenon_time)
-                    OVER (PARTITION BY o.station_id ORDER BY o.phenomenon_time)
-                    AS next_time
-            FROM observations o
-            JOIN datastream_station ds ON o.station_id = ds.station_id
-            WHERE o.phenomenon_time::date = (SELECT day FROM latest_day)
-        ),
-        charging_intervals AS (
-            SELECT
-                station_name,
-                address,
-                latitude,
-                longitude,
-                EXTRACT(EPOCH FROM (next_time - phenomenon_time)) / 3600.0 AS duration_hrs
-            FROM ordered
-            WHERE result = 'CHARGING' AND next_time IS NOT NULL
-        ),
-        aggregated AS (
-            SELECT
-                station_name,
-                address,
-                latitude,
-                longitude,
-                SUM(duration_hrs) AS charging_hours,
-                COUNT(*) AS sessions
-            FROM charging_intervals
-            GROUP BY station_name, address, latitude, longitude
         )
-        SELECT *, (SELECT day FROM latest_day) AS data_date
-        FROM aggregated
-        WHERE charging_hours > 0
-        ORDER BY charging_hours DESC
+        SELECT
+            ds.station_name,
+            ds.address,
+            ds.latitude,
+            ds.longitude,
+            COUNT(*) AS sessions,
+            COUNT(*) * 0.25 AS charging_hours,
+            (SELECT day FROM latest_day) AS data_date
+        FROM observations o
+        JOIN datastream_station ds ON o.station_id = ds.station_id
+        WHERE o.phenomenon_time::date = (SELECT day FROM latest_day)
+          AND o.result = 'CHARGING'
+        GROUP BY ds.station_name, ds.address, ds.latitude, ds.longitude
+        ORDER BY sessions DESC
         LIMIT 10;
     """
     return run_query(sql_str)
@@ -820,48 +793,21 @@ def compute_yesterday_top10():
         ),
         target_day AS (
             SELECT MIN(day) AS day FROM ranked_days
-        ),
-        ordered AS (
-            SELECT
-                o.station_id,
-                ds.station_name,
-                ds.address,
-                ds.latitude,
-                ds.longitude,
-                o.phenomenon_time,
-                o.result,
-                LEAD(o.phenomenon_time)
-                    OVER (PARTITION BY o.station_id ORDER BY o.phenomenon_time)
-                    AS next_time
-            FROM observations o
-            JOIN datastream_station ds ON o.station_id = ds.station_id
-            WHERE o.phenomenon_time::date = (SELECT day FROM target_day)
-        ),
-        charging_intervals AS (
-            SELECT
-                station_name,
-                address,
-                latitude,
-                longitude,
-                EXTRACT(EPOCH FROM (next_time - phenomenon_time)) / 3600.0 AS duration_hrs
-            FROM ordered
-            WHERE result = 'CHARGING' AND next_time IS NOT NULL
-        ),
-        aggregated AS (
-            SELECT
-                station_name,
-                address,
-                latitude,
-                longitude,
-                SUM(duration_hrs) AS charging_hours,
-                COUNT(*) AS sessions
-            FROM charging_intervals
-            GROUP BY station_name, address, latitude, longitude
         )
-        SELECT *, (SELECT day FROM target_day) AS data_date
-        FROM aggregated
-        WHERE charging_hours > 0
-        ORDER BY charging_hours DESC
+        SELECT
+            ds.station_name,
+            ds.address,
+            ds.latitude,
+            ds.longitude,
+            COUNT(*) AS sessions,
+            COUNT(*) * 0.25 AS charging_hours,
+            (SELECT day FROM target_day) AS data_date
+        FROM observations o
+        JOIN datastream_station ds ON o.station_id = ds.station_id
+        WHERE o.phenomenon_time::date = (SELECT day FROM target_day)
+          AND o.result = 'CHARGING'
+        GROUP BY ds.station_name, ds.address, ds.latitude, ds.longitude
+        ORDER BY sessions DESC
         LIMIT 10;
     """
     return run_query(sql_str)
