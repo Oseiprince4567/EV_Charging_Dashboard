@@ -755,25 +755,18 @@ def run_query(sql_str, params=None):
 # ⚡ Realistic Top-10 busiest stations (aggregated by station_name)
 # ----------------------------------------------------------------
 def compute_daily_top10():
-    """Return top 10 busiest EV stations for the most recent day with CHARGING data."""
+    """Return top 10 busiest EV stations by total CHARGING events across all time."""
     sql_str = """
-        WITH latest_day AS (
-            SELECT MAX(phenomenon_time::date) AS day
-            FROM observations
-            WHERE result = 'CHARGING'
-        )
         SELECT
             ds.station_name,
             ds.address,
             ds.latitude,
             ds.longitude,
             COUNT(*) AS sessions,
-            COUNT(*) * 0.25 AS charging_hours,
-            (SELECT day FROM latest_day) AS data_date
+            COUNT(*) * 0.25 AS charging_hours
         FROM observations o
         JOIN datastream_station ds ON o.station_id = ds.station_id
-        WHERE o.phenomenon_time::date = (SELECT day FROM latest_day)
-          AND o.result = 'CHARGING'
+        WHERE o.result = 'CHARGING'
         GROUP BY ds.station_name, ds.address, ds.latitude, ds.longitude
         ORDER BY sessions DESC
         LIMIT 10;
@@ -782,33 +775,21 @@ def compute_daily_top10():
 
 
 def compute_yesterday_top10():
-    """Return top 10 busiest EV stations for the second most recent day with CHARGING data."""
+    """Return stations ranked 11-20 by total CHARGING events across all time."""
     sql_str = """
-        WITH ranked_days AS (
-            SELECT DISTINCT phenomenon_time::date AS day
-            FROM observations
-            WHERE result = 'CHARGING'
-            ORDER BY day DESC
-            LIMIT 2
-        ),
-        target_day AS (
-            SELECT MIN(day) AS day FROM ranked_days
-        )
         SELECT
             ds.station_name,
             ds.address,
             ds.latitude,
             ds.longitude,
             COUNT(*) AS sessions,
-            COUNT(*) * 0.25 AS charging_hours,
-            (SELECT day FROM target_day) AS data_date
+            COUNT(*) * 0.25 AS charging_hours
         FROM observations o
         JOIN datastream_station ds ON o.station_id = ds.station_id
-        WHERE o.phenomenon_time::date = (SELECT day FROM target_day)
-          AND o.result = 'CHARGING'
+        WHERE o.result = 'CHARGING'
         GROUP BY ds.station_name, ds.address, ds.latitude, ds.longitude
         ORDER BY sessions DESC
-        LIMIT 10;
+        LIMIT 10 OFFSET 10;
     """
     return run_query(sql_str)
 
